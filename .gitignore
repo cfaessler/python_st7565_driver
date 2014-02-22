@@ -1,0 +1,23 @@
+~*
+
+# vim swap-files:
+*.swp
+
+# MacOSX temp-files
+*.DS_Store
+
+# Python byte code
+*.pyc
+
+# Databases
+*.db
+*.db-journal
+
+#PyCharm IDE
+.idea/*
+
+# Other files
+*.log
+*.orig
+.cache
+.coverage
