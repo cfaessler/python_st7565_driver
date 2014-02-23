@@ -62,8 +62,13 @@ class ST7565(object):
         self.write_command(DISPLAY_ON)
 
     def set_column(self, column):
+        assert 0 <= column < 128
         self.write_command(COLUMN_ADDRESS_HIGH | ((column & 0xF0) >> 4))
         self.write_command(COLUMN_ADDRESS_LOW | column & 0x0F)
+
+    def set_page(self, page):
+        assert 0 <= page < 8
+        self.write_command(PAGE_ADDRESS | page)
 
     def set_line(self, line):
         self.write_command(PAGE_ADDRESS | line)
@@ -81,5 +86,21 @@ class ST7565(object):
 
     def _send_byte(self, byte):
         self.device.write(byte)
+
+    def write_page(self, bitmap, page):
+        self.set_page(page)
+        #TODO does the internal RAM address counter increment by 1 (one-bit) or by one byte?
+        #TODO if per bit, then incrementing column by 8 maybe faster
+        self.set_column(0)
+        for val in bitmap:
+            self.write_data(val)
+
+    def write_bitmap(self, bitmap):
+        # bitmap should contain 8 pages
+        assert len(bitmap) == 8
+        for page in range(8):
+            page_start = 128 * page
+            page_end = (page + 1) * 128
+            self.write_page(bitmap[page_start:page_end])
 
 

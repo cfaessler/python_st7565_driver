@@ -16,7 +16,6 @@ class Display(object):
         idx = 0x80 >> x % 8
         return 1 if self.buffer[y][x_byte] & idx else 0
 
-
     def set_pixel(self, x, y, value):
         x_byte = int(x / 8)
         idx = 0x80 >> x % 8

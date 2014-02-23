@@ -12,6 +12,14 @@ class ListStream(object):
     def write(self, data):
         self.buffer.append(data)
 
+    def get_buffer(self):
+        #TODO: Is there a better way to do this? maybe within the print function (no line-end)?
+        for byte in self.buffer:
+            if byte == '':
+                self.buffer.remove(byte)
+
+        return self.buffer
+
 
 class DriverTest(unittest.TestCase):
     def setUp(self):
@@ -39,11 +47,35 @@ class DriverTest(unittest.TestCase):
         self.driver.init()
         print("Data in stream was:")
 
-        #TODO: Is there a better way to do this? maybe within the print function (no line-end)?
-        for byte in self.stream.buffer:
-            if byte == '':
-                self.stream.buffer.remove(byte)
+        self.assertEqual(self.stream.get_buffer(), init_sequence, "Init sequence not as it should be!")
 
-        #print(self.stream.buffer)
-        self.assertEqual(self.stream.buffer, init_sequence, "Init sequence not as it should be!")
+    def test_write_data(self):
+        self.stream.buffer = []
+        self.driver.set_page(2)
+        self.driver.set_column(12)
+        self.driver.write_data(0x42)
 
+        test_sequence = [
+            '0 10110010',
+            '0 00010000',
+            '0 00001100',
+            '1 01000010'
+        ]
+
+        self.assertEqual(self.stream.get_buffer(), test_sequence,
+                         "writing byte value 0x42 to page 2 column 12 was not successful")
+
+    def test_write_page(self):
+        self.stream.buffer = []
+        page_pattern = [0x42] * 128
+        self.driver.write_page(page_pattern, 2)
+
+        string_pattern = ['1 01000010'] * 128
+        test_sequence = [
+            '0 10110010',
+            '0 00010000',
+            '0 00000000'
+        ]
+        test_sequence.extend(string_pattern)
+        buf = self.stream.get_buffer()
+        self.assertListEqual(buf, test_sequence, "shit happened")
