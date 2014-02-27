@@ -1,1 +1,2 @@
 pytest
+RPi.GPIO == 0.5.4
